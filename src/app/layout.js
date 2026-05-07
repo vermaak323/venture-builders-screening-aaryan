@@ -1,0 +1,37 @@
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Providers from "@/components/Providers";
+import Navbar from "@/components/Navbar";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "Help Study Abroad - Admin",
+  description: "Dashboard for User and Product management",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
+      <body>
+        <Providers>
+          <Navbar />
+          <main style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+            {children}
+          </main>
+        </Providers>
+      </body>
+    </html>
+  );
+}
