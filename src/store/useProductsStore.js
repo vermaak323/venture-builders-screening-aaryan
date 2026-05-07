@@ -13,9 +13,19 @@ const useProductsStore = create((set, get) => ({
   searchQuery: '',
   selectedCategory: '',
   loading: false,
-  hasFetchedAll: false,
+  hasFetchedAll: false, // Flag to track if the full catalog is cached
   error: null,
   clearError: () => set({ error: null }),
+
+  /**
+   * 3c. Client-Side Caching Strategy
+   * We use a "Load Once, Search Locally" strategy.
+   * - Why: Reduces the number of API calls significantly, preventing 429 Rate Limit errors.
+   * - Implementation: The first time any product data is needed, we fetch the entire 100-item 
+   *   catalog using limit=0. We store this in 'allProducts'.
+   * - Usage: All subsequent pagination, search, and category filtering happen in memory
+   *   using the 'applyFilters' helper.
+   */
 
   fetchCategories: async () => {
     try {

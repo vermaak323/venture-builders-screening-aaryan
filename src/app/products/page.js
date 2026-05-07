@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import {
-  Box, Typography, TextField, Grid, Card, CardContent,
+  Box, Typography, Grid, Card, CardContent,
   CardMedia, Button, MenuItem, Select, FormControl, InputLabel,
-  CircularProgress, Alert, Chip, Pagination, InputAdornment, Skeleton, OutlinedInput
+  Alert, Chip, Pagination, InputAdornment, Skeleton, OutlinedInput
 } from '@mui/material';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
@@ -12,17 +12,73 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import useProductsStore from '@/store/useProductsStore';
 
+// 3b. Optimization: Memoize the Product Card to prevent unnecessary re-renders
+// during search/filter operations in the parent component.
+const ProductCard = memo(({ product, loading }) => (
+  <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+    <Card sx={{ 
+      height: '100%', display: 'flex', flexDirection: 'column', 
+      position: 'relative', opacity: loading ? 0.6 : 1,
+      transition: 'opacity 0.2s'
+    }}>
+      <Chip
+        label={`$${product.price}`}
+        color="primary"
+        size="small"
+        sx={{ position: 'absolute', top: 12, right: 12, fontWeight: 700, zIndex: 1 }}
+      />
+      <CardMedia
+        component="img"
+        height="160"
+        image={product.thumbnail}
+        alt={product.title}
+        sx={{ p: 2, objectFit: 'contain', bgcolor: '#f1f5f9' }}
+      />
+      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+        <Typography variant="caption" color="secondary.main" fontWeight="700" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+          {product.category}
+        </Typography>
+        <Typography variant="h6" sx={{ fontSize: '1.1rem', mb: 1, height: '2.8rem', overflow: 'hidden', lineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical' }}>
+          {product.title}
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
+          <Typography variant="body2" color={product.stock < 10 ? 'error.main' : 'success.main'} fontWeight="600">
+            {product.stock < 10 ? `Low Stock: ${product.stock}` : `In Stock: ${product.stock}`}
+          </Typography>
+        </Box>
+        <Button
+          fullWidth
+          component={Link}
+          href={`/products/${product.id}`}
+          variant="outlined"
+          size="small"
+          sx={{ mt: 2 }}
+        >
+          View Details
+        </Button>
+      </CardContent>
+    </Card>
+  </Grid>
+));
+
+ProductCard.displayName = 'ProductCard';
+
 export default function ProductsPage() {
   const {
     products, categories, total, skip, limit, searchQuery, selectedCategory,
     loading, error, fetchProducts, fetchCategories, clearError, refreshData
   } = useProductsStore();
+  
   const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  // 3b. Optimization: Use useCallback to stabilize function references
+  const handleFetch = useCallback((...args) => fetchProducts(...args), [fetchProducts]);
+  const handleRefresh = useCallback(() => refreshData(), [refreshData]);
 
   useEffect(() => {
     fetchCategories();
     if (products.length === 0 && !loading && !error) {
-      fetchProducts(skip, limit, searchQuery, selectedCategory);
+      handleFetch(skip, limit, searchQuery, selectedCategory);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -30,11 +86,11 @@ export default function ProductsPage() {
   useEffect(() => {
     const handler = setTimeout(() => {
       if (localSearch !== searchQuery) {
-        fetchProducts(0, limit, localSearch, selectedCategory);
+        handleFetch(0, limit, localSearch, selectedCategory);
       }
     }, 500);
     return () => clearTimeout(handler);
-  }, [localSearch, limit, searchQuery, selectedCategory, fetchProducts]);
+  }, [localSearch, limit, searchQuery, selectedCategory, handleFetch]);
 
   return (
     <Box>
@@ -42,13 +98,13 @@ export default function ProductsPage() {
         <Box>
           <Typography variant="h4" fontWeight="bold" gutterBottom>Product Catalog</Typography>
           <Typography variant="body2" color="text.secondary">
-            Explore our extensive range of products and manage inventory.
+            Explore our range with real-time local search and filtering.
           </Typography>
         </Box>
         <Button 
           variant="outlined" 
           startIcon={<RefreshIcon />} 
-          onClick={refreshData}
+          onClick={handleRefresh}
           disabled={loading}
           sx={{ borderRadius: 2 }}
         >
@@ -85,7 +141,7 @@ export default function ProductsPage() {
                 labelId="category-label"
                 value={selectedCategory}
                 label="Category Filter"
-                onChange={(e) => fetchProducts(0, limit, '', e.target.value)}
+                onChange={(e) => handleFetch(0, limit, '', e.target.value)}
                 startAdornment={
                   <InputAdornment position="start" sx={{ mr: 1 }}>
                     <FilterListIcon fontSize="small" />
@@ -130,46 +186,7 @@ export default function ProductsPage() {
           ))
         ) : products.length > 0 ? (
           products.map((product) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', opacity: loading ? 0.6 : 1 }}>
-                <Chip
-                  label={`$${product.price}`}
-                  color="primary"
-                  size="small"
-                  sx={{ position: 'absolute', top: 12, right: 12, fontWeight: 700, zIndex: 1 }}
-                />
-                <CardMedia
-                  component="img"
-                  height="160"
-                  image={product.thumbnail}
-                  alt={product.title}
-                  sx={{ p: 2, objectFit: 'contain', bgcolor: '#f1f5f9' }}
-                />
-                <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                  <Typography variant="caption" color="secondary.main" fontWeight="700" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
-                    {product.category}
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontSize: '1.1rem', mb: 1, height: '2.8rem', overflow: 'hidden', lineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical' }}>
-                    {product.title}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                    <Typography variant="body2" color={product.stock < 10 ? 'error.main' : 'success.main'} fontWeight="600">
-                      {product.stock < 10 ? `Low Stock: ${product.stock}` : `In Stock: ${product.stock}`}
-                    </Typography>
-                  </Box>
-                  <Button
-                    fullWidth
-                    component={Link}
-                    href={`/products/${product.id}`}
-                    variant="outlined"
-                    size="small"
-                    sx={{ mt: 2 }}
-                  >
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+            <ProductCard key={product.id} product={product} loading={loading} />
           ))
         ) : (
           <Grid size={{ xs: 12 }}>
@@ -184,7 +201,7 @@ export default function ProductsPage() {
         <Pagination
           count={Math.ceil(total / limit)}
           page={Math.floor(skip / limit) + 1}
-          onChange={(_, page) => fetchProducts((page - 1) * limit, limit, searchQuery, selectedCategory)}
+          onChange={(_, page) => handleFetch((page - 1) * limit, limit, searchQuery, selectedCategory)}
           color="primary"
           shape="rounded"
           disabled={loading}

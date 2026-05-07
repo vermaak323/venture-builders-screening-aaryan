@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import {
-  Box, Typography, TextField, Table, TableBody, TableCell, TableContainer,
+  Box, Typography, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Alert, Button, Card, Grid,
   InputAdornment, Skeleton, Avatar, Chip, Pagination, OutlinedInput, FormControl
 } from '@mui/material';
@@ -11,24 +11,72 @@ import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import useUsersStore from '@/store/useUsersStore';
 
+// 3b. Optimization: Memoize the User Table Row to prevent unnecessary re-renders
+const UserTableRow = memo(({ user }) => (
+  <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+    <TableCell>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
+        <Box>
+          <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
+          <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
+        </Box>
+      </Box>
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">{user.email}</Typography>
+      <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
+    </TableCell>
+    <TableCell>
+      <Chip
+        label={user.gender}
+        size="small"
+        color={user.gender === 'female' ? 'secondary' : 'primary'}
+        variant="outlined"
+      />
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">{user.company?.name}</Typography>
+      <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Button
+        component={Link}
+        href={`/users/${user.id}`}
+        variant="text"
+        size="small"
+        sx={{ fontWeight: 600 }}
+      >
+        View Details
+      </Button>
+    </TableCell>
+  </TableRow>
+));
+
+UserTableRow.displayName = 'UserTableRow';
+
 export default function UsersPage() {
   const { users, total, skip, limit, searchQuery, loading, error, fetchUsers, clearError, refreshData } = useUsersStore();
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
-  // Debounce search query to prevent excessive API calls
+  // 3b. Optimization: Use useCallback to stabilize function references
+  const handleFetch = useCallback((...args) => fetchUsers(...args), [fetchUsers]);
+  const handleRefresh = useCallback(() => refreshData(), [refreshData]);
+
+  // Debounce search query to prevent excessive state updates
   useEffect(() => {
     const handler = setTimeout(() => {
       if (localSearch !== searchQuery) {
-        fetchUsers(0, limit, localSearch);
+        handleFetch(0, limit, localSearch);
       }
     }, 500);
     return () => clearTimeout(handler);
-  }, [localSearch, limit, searchQuery, fetchUsers]);
+  }, [localSearch, limit, searchQuery, handleFetch]);
 
   // Initial data fetch if the store is empty
   useEffect(() => {
     if (users.length === 0 && !loading && !error) {
-      fetchUsers(skip, limit, searchQuery);
+      handleFetch(skip, limit, searchQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -45,7 +93,7 @@ export default function UsersPage() {
         <Button 
           variant="outlined" 
           startIcon={<RefreshIcon />} 
-          onClick={refreshData}
+          onClick={handleRefresh}
           disabled={loading}
           sx={{ borderRadius: 2 }}
         >
@@ -107,44 +155,7 @@ export default function UsersPage() {
               ))
             ) : (
               users.map((user) => (
-                <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
-                      <Box>
-                        <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
-                        <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{user.email}</Typography>
-                    <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={user.gender}
-                      size="small"
-                      color={user.gender === 'female' ? 'secondary' : 'primary'}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{user.company?.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      component={Link}
-                      href={`/users/${user.id}`}
-                      variant="text"
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <UserTableRow key={user.id} user={user} />
               ))
             )}
           </TableBody>
@@ -155,7 +166,7 @@ export default function UsersPage() {
         <Pagination
           count={Math.ceil(total / limit)}
           page={Math.floor(skip / limit) + 1}
-          onChange={(_, page) => fetchUsers((page - 1) * limit, limit, searchQuery)}
+          onChange={(_, page) => handleFetch((page - 1) * limit, limit, searchQuery)}
           color="primary"
           shape="rounded"
           disabled={loading}

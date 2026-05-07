@@ -11,9 +11,18 @@ const useUsersStore = create((set, get) => ({
   limit: 10,
   searchQuery: '',
   loading: false,
-  hasFetchedAll: false,
+  hasFetchedAll: false, // Flag to track if all users are cached locally
   error: null,
   clearError: () => set({ error: null }),
+
+  /**
+   * 3c. Client-Side Caching Strategy
+   * We implement an in-memory cache for the entire users list.
+   * - Why: Improves UX by making search and pagination instantaneous and 
+   *   eliminates redundant network overhead.
+   * - Implementation: fetchAllUsers() pulls the complete list once.
+   * - Usage: applyFilters() runs locally on the cached 'allUsers' array.
+   */
 
   // New method to fetch everything once
   fetchAllUsers: async (force = false) => {
