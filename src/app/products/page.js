@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   Box, Typography, TextField, Grid, Card, CardContent, 
   CardMedia, Button, MenuItem, Select, FormControl, InputLabel, 
-  CircularProgress, Alert, Chip, Pagination, InputAdornment, Skeleton
+  CircularProgress, Alert, Chip, Pagination, InputAdornment, Skeleton, OutlinedInput
 } from '@mui/material';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
@@ -47,22 +47,24 @@ export default function ProductsPage() {
       <Card sx={{ mb: 4, p: 2 }}>
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
           <Grid size={{ xs: 12, md: 5 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search products..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              disabled={!!selectedCategory}
-              InputProps={{
-                startAdornment: (
+            <FormControl fullWidth size="small">
+              <OutlinedInput
+                placeholder="Search products..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                disabled={!!selectedCategory}
+                startAdornment={
                   <InputAdornment position="start">
                     <SearchIcon color="action" />
                   </InputAdornment>
-                ),
-              }}
-              helperText={selectedCategory ? "Search disabled when filtering by category" : ""}
-            />
+                }
+              />
+              {selectedCategory && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
+                  Search disabled when filtering by category
+                </Typography>
+              )}
+            </FormControl>
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth size="small">

@@ -120,7 +120,7 @@ export default function ProductDetailPage() {
               )}
             </Box>
             
-            <Typography variant="body1" color="text.secondary" paragraph sx={{ lineHeight: 1.8 }}>
+            <Typography variant="body1" color="text.secondary" component="p" sx={{ lineHeight: 1.8, mb: 2 }}>
               {p.description}
             </Typography>
 

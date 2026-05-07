@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   Box, Typography, TextField, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Paper, Alert, Button, Card, Grid, 
-  InputAdornment, Skeleton, Avatar, Chip, Pagination 
+  InputAdornment, Skeleton, Avatar, Chip, Pagination, OutlinedInput, FormControl 
 } from '@mui/material';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
@@ -44,20 +44,18 @@ export default function UsersPage() {
       <Card sx={{ mb: 4, p: 2 }}>
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search by name, email, or company..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
+            <FormControl fullWidth size="small">
+              <OutlinedInput
+                placeholder="Search by name, email, or company..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                startAdornment={
                   <InputAdornment position="start">
                     <SearchIcon color="action" />
                   </InputAdornment>
-                ),
-              }}
-            />
+                }
+              />
+            </FormControl>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Typography variant="body2" color="text.secondary">
