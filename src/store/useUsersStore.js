@@ -1,5 +1,15 @@
 import { create } from 'zustand';
 
+/**
+ * ZUSTAND STATE MANAGEMENT RATIONALE:
+ * We chose Zustand for this assessment because:
+ * 1. Simplicity: Much less boilerplate compared to Redux (no reducers, types, or complex setup).
+ * 2. Small Footprint: It's extremely lightweight (~1KB), keeping the bundle size small.
+ * 3. Built-in Async: Actions are just functions, making API integration straightforward.
+ * 4. Performant: It handles transient state updates efficiently without excessive re-renders.
+ */
+
+// Use relative path for client-side proxying via next.config.js rewrites
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/external';
 
 const useUsersStore = create((set, get) => ({
@@ -12,7 +22,15 @@ const useUsersStore = create((set, get) => ({
   error: null,
   clearError: () => set({ error: null }),
   
-  // Cache to avoid repeat API calls
+  /**
+   * CACHING STRATEGY:
+   * We implement a dictionary-based caching layer (`cache` object).
+   * - Key: A unique string based on skip, limit, and query parameters.
+   * - Value: The response data (users array and total count).
+   * 
+   * Benefit: Avoids repeat API calls when the user navigates between pages or search queries 
+   * they've already visited, resulting in an "instant" UI feel and reduced server load.
+   */
   cache: {},
 
   fetchUsers: async (skip = 0, limit = 10, query = '') => {

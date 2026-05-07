@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,21 +18,21 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     clearAuth();
     await signOut({ callbackUrl: '/login' });
-  };
+  }, [clearAuth]);
 
   if (!mounted) return null;
 
   // Only render on protected routes
   if (pathname === '/login') return null;
 
-  const navLinks = [
+  const navLinks = useMemo(() => [
     { title: 'Dashboard', path: '/' },
     { title: 'Users', path: '/users' },
     { title: 'Products', path: '/products' },
-  ];
+  ], []);
 
   return (
     <AppBar 

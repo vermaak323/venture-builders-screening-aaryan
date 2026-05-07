@@ -10,6 +10,47 @@ import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
 import useUsersStore from '@/store/useUsersStore';
 
+const UserTableRow = React.memo(({ user }) => (
+  <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+    <TableCell>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
+        <Box>
+          <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
+          <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
+        </Box>
+      </Box>
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">{user.email}</Typography>
+      <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
+    </TableCell>
+    <TableCell>
+      <Chip 
+        label={user.gender} 
+        size="small" 
+        color={user.gender === 'female' ? 'secondary' : 'primary'} 
+        variant="outlined" 
+      />
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">{user.company?.name}</Typography>
+      <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Button 
+        component={Link} 
+        href={`/users/${user.id}`} 
+        variant="text" 
+        size="small"
+        sx={{ fontWeight: 600 }}
+      >
+        View Details
+      </Button>
+    </TableCell>
+  </TableRow>
+));
+
 export default function UsersPage() {
   const { users, total, skip, limit, searchQuery, loading, error, fetchUsers, clearError } = useUsersStore();
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -87,44 +128,7 @@ export default function UsersPage() {
               ))
             ) : (
               users.map((user) => (
-                <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
-                      <Box>
-                        <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
-                        <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{user.email}</Typography>
-                    <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={user.gender} 
-                      size="small" 
-                      color={user.gender === 'female' ? 'secondary' : 'primary'} 
-                      variant="outlined" 
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{user.company?.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button 
-                      component={Link} 
-                      href={`/users/${user.id}`} 
-                      variant="text" 
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <UserTableRow key={user.id} user={user} />
               ))
             )}
           </TableBody>

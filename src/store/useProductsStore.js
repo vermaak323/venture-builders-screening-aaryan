@@ -1,5 +1,13 @@
 import { create } from 'zustand';
 
+/**
+ * ZUSTAND STATE MANAGEMENT RATIONALE:
+ * Zustand was chosen for its simplicity and minimal boilerplate. Unlike Redux, it allows 
+ * us to handle async actions (API calls) directly within the store, which is ideal 
+ * for a mid-sized dashboard application.
+ */
+
+// Use relative path for client-side proxying via next.config.js rewrites
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/external';
 
 const useProductsStore = create((set, get) => ({
@@ -14,7 +22,11 @@ const useProductsStore = create((set, get) => ({
   error: null,
   clearError: () => set({ error: null }),
   
-  // Cache to avoid repeat API calls
+  /**
+   * CACHING STRATEGY:
+   * Dictionary-based caching layer for list views.
+   * Caches results based on pagination state, search queries, and active categories.
+   */
   cache: {},
 
   fetchCategories: async () => {
