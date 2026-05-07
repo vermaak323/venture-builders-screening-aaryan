@@ -6,6 +6,7 @@ import {
   Divider, Button, CircularProgress, Alert, Stack, Chip
 } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -47,13 +48,13 @@ export default function UserDetailPage() {
 
   return (
     <Box>
-      <Button 
-        startIcon={<ArrowBackIcon />} 
-        onClick={() => router.back()} 
-        sx={{ mb: 4, fontWeight: 700 }}
-      >
-        Back to Directory
-      </Button>
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Dashboard</Link>
+        <Typography sx={{ color: '#cbd5e1' }}>/</Typography>
+        <Link href="/users" style={{ textDecoration: 'none', color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Users</Link>
+        <Typography sx={{ color: '#cbd5e1' }}>/</Typography>
+        <Typography sx={{ color: 'primary.main', fontSize: '0.875rem', fontWeight: 600 }}>User Profile</Typography>
+      </Box>
 
       <Grid container spacing={4}>
         {/* Profile Sidebar */}

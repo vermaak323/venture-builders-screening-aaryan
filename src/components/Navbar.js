@@ -35,7 +35,15 @@ export default function Navbar() {
   ];
 
   return (
-    <AppBar position="sticky" elevation={0}>
+    <AppBar 
+      position="sticky" 
+      elevation={0} 
+      sx={{ 
+        bgcolor: 'rgba(255, 255, 255, 0.8)', 
+        backdropFilter: 'blur(10px)', 
+        borderBottom: '1px solid #e2e8f0' 
+      }}
+    >
       <Toolbar sx={{ maxWidth: '1200px', width: '100%', mx: 'auto', px: { xs: 2, lg: 0 } }}>
         <Typography 
           variant="h5" 
@@ -46,9 +54,13 @@ export default function Navbar() {
             fontWeight: 800, 
             color: 'primary.main', 
             textDecoration: 'none',
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.02em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
           }}
         >
+          <Box sx={{ width: 32, height: 32, bgcolor: 'primary.main', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '1rem' }}>G</Box>
           Study<span style={{ color: '#0f172a' }}>Abroad</span>
         </Typography>
         
@@ -60,10 +72,11 @@ export default function Navbar() {
               href={link.path}
               sx={{ 
                 px: 2,
+                fontWeight: 600,
                 color: pathname === link.path ? 'primary.main' : 'text.secondary',
-                bgcolor: pathname === link.path ? 'primary.light' + '15' : 'transparent',
+                bgcolor: pathname === link.path ? '#6366f115' : 'transparent',
                 '&:hover': {
-                   bgcolor: 'primary.light' + '10',
+                   bgcolor: '#6366f108',
                 }
               }}
             >
@@ -71,14 +84,20 @@ export default function Navbar() {
             </Button>
           ))}
           {session && (
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleLogout}
-              sx={{ ml: 2, borderRadius: 2 }}
-            >
-              Logout
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 3, gap: 2, pl: 3, borderLeft: '1px solid #e2e8f0' }}>
+               <Box sx={{ textAlign: 'right' }}>
+                 <Typography variant="body2" fontWeight="700" sx={{ lineHeight: 1 }}>{session.user.name}</Typography>
+                 <Typography variant="caption" color="text.secondary">Administrator</Typography>
+               </Box>
+               <Button 
+                variant="outlined" 
+                size="small"
+                onClick={handleLogout}
+                sx={{ borderRadius: 2, fontWeight: 700, textTransform: 'none' }}
+              >
+                Sign Out
+              </Button>
+            </Box>
           )}
         </Box>
 

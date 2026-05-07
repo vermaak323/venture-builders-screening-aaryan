@@ -6,6 +6,7 @@ import {
   CircularProgress, Alert, Chip, Divider, Rating, Paper, Stack, IconButton 
 } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
@@ -50,13 +51,13 @@ export default function ProductDetailPage() {
 
   return (
     <Box>
-      <Button 
-        startIcon={<ArrowBackIcon />} 
-        onClick={() => router.back()} 
-        sx={{ mb: 4, fontWeight: 700 }}
-      >
-        Back to Catalog
-      </Button>
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Dashboard</Link>
+        <Typography sx={{ color: '#cbd5e1' }}>/</Typography>
+        <Link href="/products" style={{ textDecoration: 'none', color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Catalog</Link>
+        <Typography sx={{ color: '#cbd5e1' }}>/</Typography>
+        <Typography sx={{ color: 'primary.main', fontSize: '0.875rem', fontWeight: 600 }}>Product Details</Typography>
+      </Box>
 
       <Grid container spacing={6}>
         {/* Image Gallery Area */}

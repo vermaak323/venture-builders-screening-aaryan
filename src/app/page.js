@@ -53,13 +53,18 @@ export default function Dashboard() {
             href="/users" 
             sx={{ 
               p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', 
-              textDecoration: 'none', color: 'inherit' 
+              textDecoration: 'none', color: 'inherit',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)'
+              }
             }}
           >
-            <Box sx={{ p: 2, borderRadius: '50%', bgcolor: 'primary.main', color: 'white', mb: 2 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', bgcolor: '#6366f115', color: 'primary.main', mb: 2 }}>
               <PeopleIcon sx={{ fontSize: 40 }} />
             </Box>
-            <Typography variant="h6" gutterBottom>Users Management</Typography>
+            <Typography variant="h6" fontWeight="700" gutterBottom>Users Management</Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               View, search and manage all registered users in the system.
             </Typography>
@@ -72,13 +77,18 @@ export default function Dashboard() {
             href="/products" 
             sx={{ 
               p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', 
-              textDecoration: 'none', color: 'inherit' 
+              textDecoration: 'none', color: 'inherit',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)'
+              }
             }}
           >
-            <Box sx={{ p: 2, borderRadius: '50%', bgcolor: 'secondary.main', color: 'white', mb: 2 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', bgcolor: '#06b6d415', color: 'secondary.main', mb: 2 }}>
               <InventoryIcon sx={{ fontSize: 40 }} />
             </Box>
-            <Typography variant="h6" gutterBottom>Products Catalog</Typography>
+            <Typography variant="h6" fontWeight="700" gutterBottom>Products Catalog</Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Browse categories, check stock levels, and manage inventory.
             </Typography>
