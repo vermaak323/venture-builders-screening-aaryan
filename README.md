@@ -1,4 +1,4 @@
-# Venture Builders - Admin Dashboard
+# Venture Builders Assessment Task
 
 A premium, high-performance Admin Dashboard built with **Next.js 15**, **Material UI**, and **Zustand**. This application delivers a seamless experience for managing users and products, featuring a resilient data-fetching architecture.
 
@@ -52,7 +52,7 @@ I implemented a **"Load Once, Search Locally"** strategy:
 
 ### 1. Clone & Install
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/vermaak323/venture-builders-screening-aaryan.git
 npm install
 ```
 
