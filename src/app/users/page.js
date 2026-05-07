@@ -1,60 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { 
-  Box, Typography, TextField, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Alert, Button, Card, Grid, 
-  InputAdornment, Skeleton, Avatar, Chip, Pagination, OutlinedInput, FormControl 
+import {
+  Box, Typography, TextField, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, Alert, Button, Card, Grid,
+  InputAdornment, Skeleton, Avatar, Chip, Pagination, OutlinedInput, FormControl
 } from '@mui/material';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import useUsersStore from '@/store/useUsersStore';
 
-const UserTableRow = React.memo(({ user }) => (
-  <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-    <TableCell>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
-        <Box>
-          <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
-          <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
-        </Box>
-      </Box>
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2">{user.email}</Typography>
-      <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
-    </TableCell>
-    <TableCell>
-      <Chip 
-        label={user.gender} 
-        size="small" 
-        color={user.gender === 'female' ? 'secondary' : 'primary'} 
-        variant="outlined" 
-      />
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2">{user.company?.name}</Typography>
-      <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
-    </TableCell>
-    <TableCell align="right">
-      <Button 
-        component={Link} 
-        href={`/users/${user.id}`} 
-        variant="text" 
-        size="small"
-        sx={{ fontWeight: 600 }}
-      >
-        View Details
-      </Button>
-    </TableCell>
-  </TableRow>
-));
-
 export default function UsersPage() {
-  const { users, total, skip, limit, searchQuery, loading, error, fetchUsers, clearError } = useUsersStore();
+  const { users, total, skip, limit, searchQuery, loading, error, fetchUsers, clearError, refreshData } = useUsersStore();
   const [localSearch, setLocalSearch] = useState(searchQuery);
-  
+
   // Debounce search query to prevent excessive API calls
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -75,11 +35,22 @@ export default function UsersPage() {
 
   return (
     <Box>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>Users Directory</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Manage and monitor all active users within the platform.
-        </Typography>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box>
+          <Typography variant="h4" gutterBottom>Users Directory</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage and monitor all active users within the platform.
+          </Typography>
+        </Box>
+        <Button 
+          variant="outlined" 
+          startIcon={<RefreshIcon />} 
+          onClick={refreshData}
+          disabled={loading}
+          sx={{ borderRadius: 2 }}
+        >
+          {loading ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
       </Box>
 
       <Card sx={{ mb: 4, p: 2 }}>
@@ -106,9 +77,17 @@ export default function UsersPage() {
         </Grid>
       </Card>
 
-      {error && <Alert severity="error" onClose={clearError} sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert 
+          severity={error.includes('Rate limit') ? 'warning' : 'error'} 
+          onClose={clearError} 
+          sx={{ mb: 2 }}
+        >
+          {error}
+        </Alert>
+      )}
 
-      <TableContainer component={Paper} sx={{ border: 'none', boxShadow: 'none', bgcolor: 'transparent' }}>
+      <TableContainer component={Paper} sx={{ border: 'none', boxShadow: 'none', bgcolor: 'transparent', opacity: loading ? 0.7 : 1 }}>
         <Table sx={{ minWidth: 650, bgcolor: 'background.paper', borderRadius: 3, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
           <TableHead sx={{ bgcolor: '#f8fafc' }}>
             <TableRow>
@@ -120,7 +99,7 @@ export default function UsersPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading ? (
+            {loading && users.length === 0 ? (
               [...Array(limit)].map((_, i) => (
                 <TableRow key={i}>
                   <TableCell colSpan={5} align="center"><Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1, my: 1 }} /></TableCell>
@@ -128,7 +107,44 @@ export default function UsersPage() {
               ))
             ) : (
               users.map((user) => (
-                <UserTableRow key={user.id} user={user} />
+                <TableRow key={user.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar src={user.image} sx={{ width: 40, height: 40 }} />
+                      <Box>
+                        <Typography variant="body2" fontWeight="600">{user.firstName} {user.lastName}</Typography>
+                        <Typography variant="caption" color="text.secondary">ID: #{user.id}</Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{user.email}</Typography>
+                    <Typography variant="caption" color="text.secondary">{user.phone}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={user.gender}
+                      size="small"
+                      color={user.gender === 'female' ? 'secondary' : 'primary'}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{user.company?.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">{user.company?.title}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button
+                      component={Link}
+                      href={`/users/${user.id}`}
+                      variant="text"
+                      size="small"
+                      sx={{ fontWeight: 600 }}
+                    >
+                      View Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))
             )}
           </TableBody>
@@ -136,12 +152,13 @@ export default function UsersPage() {
       </TableContainer>
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <Pagination 
-          count={Math.ceil(total / limit)} 
-          page={Math.floor(skip / limit) + 1} 
+        <Pagination
+          count={Math.ceil(total / limit)}
+          page={Math.floor(skip / limit) + 1}
           onChange={(_, page) => fetchUsers((page - 1) * limit, limit, searchQuery)}
           color="primary"
           shape="rounded"
+          disabled={loading}
         />
       </Box>
     </Box>
